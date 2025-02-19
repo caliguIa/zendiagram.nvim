@@ -7,6 +7,16 @@ A minimal, good looking diagnostic float window for Neovim.
 - Clean, distraction-free diagnostic floating window
 - Markdown formatting with syntax highlighting for clearer errors
 
+## Demo
+
+Using `default` style:
+
+<img src="https://github.com/caliguIa/zendiagram.nvim/blob/main/assets/default_multi.png?raw=true" style="width: 100%"/>
+
+Using `compact` style:
+
+<img src="https://github.com/caliguIa/zendiagram.nvim/blob/main/assets/compact_multi.png?raw=true" style="width: 45%"/> <img src="https://github.com/caliguIa/zendiagram.nvim/blob/main/assets/compact_single.png?raw=true" style="width: 45%"/>
+
 ## Installation
 
 <details>
