@@ -9,13 +9,16 @@ A minimal, good looking diagnostic float window for Neovim.
 
 ## Demo
 
-Using `default` style:
-
+<details>
+  <summary>Using compact style</summary>
 <img src="https://github.com/caliguIa/zendiagram.nvim/blob/main/assets/default_multi.png?raw=true" style="width: 100%"/>
+</details>
 
-Using `compact` style:
-
-<img src="https://github.com/caliguIa/zendiagram.nvim/blob/main/assets/compact_multi.png?raw=true" style="width: 45%"/> <img src="https://github.com/caliguIa/zendiagram.nvim/blob/main/assets/compact_single.png?raw=true" style="width: 45%"/>
+<details>
+  <summary>Using compact style</summary>
+<img src="https://github.com/caliguIa/zendiagram.nvim/blob/main/assets/compact_multi.png?raw=true" style="width: 100%"/> 
+<img src="https://github.com/caliguIa/zendiagram.nvim/blob/main/assets/compact_single.png?raw=true" style="width: 100%"/>
+</details>
 
 ## Installation
 
