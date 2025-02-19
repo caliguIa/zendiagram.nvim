@@ -15,7 +15,6 @@ local function get_current_diagnostics()
     return vim.diagnostic.get(bufnr, { lnum = line })
 end
 
----Open diagnostics window
 function Float.open()
     -- Handle existing window
     if _diagnostic_win and _api.nvim_win_is_valid(_diagnostic_win) then
@@ -38,7 +37,6 @@ function Float.open()
     _window.setup_window_keymaps(_diagnostic_win, buf)
 end
 
----Close diagnostics window
 function Float.close()
     if _diagnostic_win and _api.nvim_win_is_valid(_diagnostic_win) then
         _api.nvim_win_close(_diagnostic_win, true)

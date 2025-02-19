@@ -33,11 +33,9 @@ local _config = {
     },
 }
 
----Validate configuration options
 ---@param opts table
 ---@return boolean is_valid
 local function validate_config(opts)
-    -- Wrap validation in pcall to catch any errors
     local ok = pcall(function()
         vim.validate({
             header = { opts.header, { "string", "nil" } },
@@ -64,7 +62,6 @@ local function validate_config(opts)
             position = { opts.position, { "table", "nil" } },
         })
 
-        -- Additional validation for position if it exists
         if opts.position then
             vim.validate({
                 ["position.row"] = { opts.position.row, "number" },
@@ -72,7 +69,6 @@ local function validate_config(opts)
             })
         end
 
-        -- Check min_width and max_width relationship if both are provided
         if opts.min_width and opts.max_width and opts.min_width > opts.max_width then
             error("min_width cannot be greater than max_width")
         end

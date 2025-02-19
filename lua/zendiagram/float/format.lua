@@ -94,10 +94,8 @@ end
 function Format.format_diagnostics(diagnostics)
     local lines = {}
 
-    -- Calculate the required width first
     local width = calculate_required_width(diagnostics)
 
-    -- Add header if configured
     local header = _config.header
     if header then table.insert(lines, header) end
 
