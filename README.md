@@ -62,7 +62,12 @@ zendiagram exposes two functions to the user:
 It's advised to use the open function in a keymap, like so:
 
 ```lua
-vim.keymap.set("n", "<Leader>e", require('zendiagram').open, { silent = true, desc = "Open diagnostics float" })
+vim.keymap.set(
+    "n",
+    "<Leader>e",
+    require('zendiagram').open,
+    { silent = true, desc = "Open diagnostics float" }
+)
 ```
 
 With the above keymap set usage would look like so:
