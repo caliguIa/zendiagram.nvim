@@ -86,7 +86,7 @@ It's advised to use the open function in a keymap, like so:
 vim.keymap.set(
     "n",
     "<Leader>e",
-    require('zendiagram').open,
+    function() require('zendiagram').open() end,
     { silent = true, desc = "Open diagnostics float" }
 )
 ```
