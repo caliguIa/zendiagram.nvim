@@ -43,7 +43,7 @@ require('zendiagram').setup()
 </details>
 
 <details>
-  <summary>mini.deps</summary>
+  <summary>lazy.nvim</summary>
 
 Using [lazy.nvim](https://github.com/folke/lazy.nvim):
 
