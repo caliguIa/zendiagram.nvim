@@ -47,6 +47,8 @@ function Window.set_window_options(win)
     vim.wo[win].foldenable = false
     vim.wo[win].signcolumn = "no"
     vim.wo[win].winhighlight = "Normal:NormalFloat"
+    local ok, res = pcall(require, "render-markdown")
+    if ok then res.enable() end
 end
 
 ---Setup window autocommands
