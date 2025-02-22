@@ -34,7 +34,7 @@ function Window.create_window_options(dimensions)
         row = dimensions.row,
         col = dimensions.col,
         style = "minimal",
-        border = "none",
+        border = _config.border,
         focusable = true,
     }
 end

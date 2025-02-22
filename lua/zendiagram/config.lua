@@ -9,6 +9,7 @@
 ---@field min_width number
 ---@field max_height number
 ---@field position ZendiagramConfigPosition
+---@field border "single"|"double"|"rounded"|"shadow"|"none"
 
 ---@class ZendiagramConfigModule
 ---@field header string|nil
@@ -17,6 +18,7 @@
 ---@field min_width number
 ---@field max_height number
 ---@field position ZendiagramConfigPosition
+---@field border "single"|"double"|"rounded"|"shadow"|"none"
 ---@field setup fun(opts: ZendiagramConfig|nil): ZendiagramConfig
 local Config = {}
 
@@ -27,6 +29,7 @@ local _config = {
     max_width = 50,
     min_width = 25,
     max_height = 10,
+    border = "none",
     position = {
         row = 1,
         col_offset = 2,
@@ -60,6 +63,18 @@ local function validate_config(opts)
                 "must be a positive number",
             },
             position = { opts.position, { "table", "nil" } },
+            border = {
+                opts.border,
+                function(border)
+                    return border == nil
+                        or border == "single"
+                        or border == "double"
+                        or border == "rounded"
+                        or border == "shadow"
+                        or border == "none"
+                end,
+                'must be "single", "double", "rounded", "shadow" or "none"',
+            },
         })
 
         if opts.position then
