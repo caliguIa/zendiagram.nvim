@@ -47,14 +47,13 @@ function Window.set_window_options(win)
     vim.wo[win].foldenable = false
     vim.wo[win].signcolumn = "no"
     vim.wo[win].winhighlight = "Normal:NormalFloat"
-    local ok, res = pcall(require, "render-markdown")
-    if ok then res.enable() end
 end
 
 ---Setup window autocommands
 ---@param win number Window handle
 ---@param buf number Buffer handle
-function Window.setup_window_autocommands(win, buf)
+---@param focus boolean Focus mode
+function Window.setup_window_autocommands(win, buf, focus)
     _api.nvim_create_autocmd("BufLeave", {
         buffer = buf,
         group = _augroup,
@@ -67,16 +66,18 @@ function Window.setup_window_autocommands(win, buf)
         once = true,
     })
 
-    _api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
-        group = _augroup,
-        callback = function()
-            if win and _api.nvim_win_is_valid(win) and _api.nvim_get_current_win() ~= win then
-                _api.nvim_win_close(win, true)
-                return true
-            end
-        end,
-        once = true,
-    })
+    if focus then
+        _api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
+            group = _augroup,
+            callback = function()
+                if win and _api.nvim_win_is_valid(win) and _api.nvim_get_current_win() ~= win then
+                    _api.nvim_win_close(win, true)
+                    return true
+                end
+            end,
+            once = true,
+        })
+    end
 end
 
 ---Setup window keymaps

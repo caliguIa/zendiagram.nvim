@@ -81,7 +81,7 @@ zendiagram exposes two functions to the user:
 - `open`: opens the diagnostics float window, and if the window is already open, focuses it
 - `close`: closes the diagnostics float window (you are likely to not need this)
 
-It's advised to use the open function in a keymap, like so:
+You can use these functions in your keymaps, or in autocmds to automatically open the diagnostics float when the cursor moves.
 
 ```lua
 vim.keymap.set(
@@ -99,7 +99,17 @@ With the above keymap set usage would look like so:
 - Use `q` to close the float
 - The float automatically closes when focus is lost, or if the float is not focused; this occurs when the cursor moves
 
+Similarly, you can use an autocmd to automatically open the diagnostics float when the cursor moves.
+Be sure to set `focus = false` to prevent the float from stealing focus on cursor move.
+
+```lua
+vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
+    callback = function() require("zendiagram").open({ focus = false }) end,
+})
+```
+
 Another option would be to override the default `vim.diagnostic.jump` keymaps like so:
+
 ```lua
 vim.keymap.set({"n", "x"}, "]d", function ()
   vim.diagnostic.jump({count = 1})
