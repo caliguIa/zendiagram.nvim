@@ -108,6 +108,26 @@ vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
 })
 ```
 
+Another option would be to override the default `vim.diagnostic.jump` keymaps like so:
+
+```lua
+vim.keymap.set({"n", "x"}, "]d", function ()
+  vim.diagnostic.jump({count = 1})
+  vim.schedule(function()
+    require("zendiagram").open()
+  end)
+end,
+{ desc = "Jump to next diagnostic" })
+
+vim.keymap.set({"n", "x"}, "[d", function ()
+  vim.diagnostic.jump({count = -1})
+  vim.schedule(function()
+    require("zendiagram").open()
+  end)
+end,
+{ desc = "Jump to prev diagnostic" })
+```
+
 Due to the markdown formatting, it is strongly advised to use a markdown rendering plugin such as
 [render-markdown.nvim](https://github.com/MeanderingProgrammer/render-markdown.nvim) to really see the benefits of zendiagram.
 
