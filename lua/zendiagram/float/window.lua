@@ -52,25 +52,21 @@ end
 ---Setup window autocommands
 ---@param win number Window handle
 ---@param buf number Buffer handle
----@param opts table Options passed to open
-function Window.setup_window_autocommands(win, buf, opts)
-    -- Only close on BufLeave if we're in focused mode
-    if opts.focus then
-        _api.nvim_create_autocmd("BufLeave", {
-            buffer = buf,
-            group = _augroup,
-            callback = function()
-                if win and _api.nvim_win_is_valid(win) then
-                    _api.nvim_win_close(win, true)
-                    return true
-                end
-            end,
-            once = true,
-        })
-    end
+---@param focus boolean Focus mode
+function Window.setup_window_autocommands(win, buf, focus)
+    _api.nvim_create_autocmd("BufLeave", {
+        buffer = buf,
+        group = _augroup,
+        callback = function()
+            if win and _api.nvim_win_is_valid(win) then
+                _api.nvim_win_close(win, true)
+                return true
+            end
+        end,
+        once = true,
+    })
 
-    -- In automatic mode, don't close on cursor moved
-    if opts.focus then
+    if focus then
         _api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
             group = _augroup,
             callback = function()
