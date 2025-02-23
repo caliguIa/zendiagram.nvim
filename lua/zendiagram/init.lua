@@ -1,8 +1,5 @@
 ---@class Zendiagram
----@field VERSION string
-local Zendiagram = {
-    VERSION = "1.0.0",
-}
+local Zendiagram = {}
 
 local _initialized = false
 local _modules = {
@@ -29,12 +26,13 @@ function Zendiagram.setup(opts)
     return Zendiagram
 end
 
-function Zendiagram.open()
+---@param opts table|nil Options for opening the window
+function Zendiagram.open(opts)
     if not _initialized then
         vim.notify("Zendiagram needs to be initialized first. Call setup()", vim.log.levels.ERROR)
         return
     end
-    _modules.float.open()
+    _modules.float.open(opts)
 end
 
 function Zendiagram.close()

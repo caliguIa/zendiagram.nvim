@@ -47,36 +47,41 @@ function Window.set_window_options(win)
     vim.wo[win].foldenable = false
     vim.wo[win].signcolumn = "no"
     vim.wo[win].winhighlight = "Normal:NormalFloat"
-    local ok, res = pcall(require, "render-markdown")
-    if ok then res.enable() end
 end
 
 ---Setup window autocommands
 ---@param win number Window handle
 ---@param buf number Buffer handle
-function Window.setup_window_autocommands(win, buf)
-    _api.nvim_create_autocmd("BufLeave", {
-        buffer = buf,
-        group = _augroup,
-        callback = function()
-            if win and _api.nvim_win_is_valid(win) then
-                _api.nvim_win_close(win, true)
-                return true
-            end
-        end,
-        once = true,
-    })
+---@param opts table Options passed to open
+function Window.setup_window_autocommands(win, buf, opts)
+    -- Only close on BufLeave if we're in focused mode
+    if opts.focus then
+        _api.nvim_create_autocmd("BufLeave", {
+            buffer = buf,
+            group = _augroup,
+            callback = function()
+                if win and _api.nvim_win_is_valid(win) then
+                    _api.nvim_win_close(win, true)
+                    return true
+                end
+            end,
+            once = true,
+        })
+    end
 
-    _api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
-        group = _augroup,
-        callback = function()
-            if win and _api.nvim_win_is_valid(win) and _api.nvim_get_current_win() ~= win then
-                _api.nvim_win_close(win, true)
-                return true
-            end
-        end,
-        once = true,
-    })
+    -- In automatic mode, don't close on cursor moved
+    if opts.focus then
+        _api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
+            group = _augroup,
+            callback = function()
+                if win and _api.nvim_win_is_valid(win) and _api.nvim_get_current_win() ~= win then
+                    _api.nvim_win_close(win, true)
+                    return true
+                end
+            end,
+            once = true,
+        })
+    end
 end
 
 ---Setup window keymaps
