@@ -1,4 +1,3 @@
--- float/format.lua
 local Format = {}
 
 local _utils = require("zendiagram.utils")
@@ -72,12 +71,13 @@ function Format.format_diagnostics(diagnostics)
                 text = " " .. line,
                 hl = "ZendiagramText",
                 keywords = {
-                    { pattern = "'[^']+'", hl = "ZendiagramKeyword" }, -- 'word'
-                    { pattern = "`[^`]+`", hl = "ZendiagramKeyword" }, -- `word`
-                    { pattern = "%([^%)]+%)", hl = "ZendiagramKeyword" }, -- (word)
-                    { pattern = "{[^}]+}", hl = "ZendiagramKeyword" }, -- {word}
-                    { pattern = "%[[^%]]+%]", hl = "ZendiagramKeyword" }, -- [word]
-                    { pattern = '"[^"]+"', hl = "ZendiagramKeyword" }, -- "word"
+                    { pattern = "'[^']+'", hl = "ZendiagramKeyword" },
+                    { pattern = "`[^`]+`", hl = "ZendiagramKeyword" },
+                    { pattern = '"[^"]+"', hl = "ZendiagramKeyword" },
+                    { pattern = "<[^>]+>", hl = "ZendiagramKeyword" },
+                    { pattern = "%([^%)]+%)", hl = "ZendiagramKeyword" },
+                    { pattern = "{[^}]+}", hl = "ZendiagramKeyword" },
+                    { pattern = "%[[^%]]+%]", hl = "ZendiagramKeyword" },
                 },
             }
             table.insert(lines, formatted_line)

@@ -1,6 +1,7 @@
 ---@class ZendiagramFloat
 local Float = {}
 
+local _utils = require("zendiagram.utils")
 local _window = require("zendiagram.float.window")
 local _buffer = require("zendiagram.float.buffer")
 local _format = require("zendiagram.float.format")
@@ -39,32 +40,7 @@ local function update_window_content(win, formatted_lines, content)
     -- Reapply highlighting
     _api.nvim_buf_clear_namespace(buf, ns, 0, -1)
     for i, line in ipairs(formatted_lines) do
-        if type(line) == "table" then
-            if line.hl then
-                _api.nvim_buf_set_extmark(buf, ns, i - 1, 0, {
-                    line_hl_group = line.hl,
-                    priority = 100,
-                })
-            end
-            if line.keywords then
-                for _, kw in ipairs(line.keywords) do
-                    local start_idx = line.text:find(kw.pattern)
-                    while start_idx do
-                        local end_idx = line.text:find("[`'\")}>%]]", start_idx + 1)
-                        if end_idx then
-                            _api.nvim_buf_set_extmark(buf, ns, i - 1, start_idx, {
-                                end_col = end_idx - 1,
-                                hl_group = kw.hl,
-                                priority = 200,
-                            })
-                            start_idx = line.text:find(kw.pattern, end_idx + 1)
-                        else
-                            break
-                        end
-                    end
-                end
-            end
-        end
+        if type(line) == "table" then _utils.apply_highlighting(buf, ns, i - 1, line) end
     end
 
     -- Update window dimensions
