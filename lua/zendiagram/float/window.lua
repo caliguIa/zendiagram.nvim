@@ -3,6 +3,7 @@ local Window = {}
 
 local _api = vim.api
 local _utils = require("zendiagram.utils")
+local _lines = require("zendiagram.float.lines")
 local _config = require("zendiagram.config")
 local _augroup = _api.nvim_create_augroup("ZendiagramWindow", { clear = true })
 
@@ -87,6 +88,26 @@ function Window.setup_window_keymaps(win, buf)
     vim.keymap.set("n", "q", function()
         if win and _api.nvim_win_is_valid(win) then _api.nvim_win_close(win, true) end
     end, { buffer = buf, nowait = true })
+end
+
+---Update existing window content and highlighting
+---@param win number Window handle
+---@param formatted_lines table[] Formatted lines with highlighting info
+---@param content string Raw content for dimension calculation
+function Window.update_window_content(win, formatted_lines, content)
+    local buf = _api.nvim_win_get_buf(win)
+
+    -- Update content and highlights
+    local text_lines = _lines.to_text(formatted_lines)
+    vim.bo[buf].modifiable = true
+    _api.nvim_buf_set_lines(buf, 0, -1, false, text_lines)
+    vim.bo[buf].modifiable = false
+    _lines.apply_highlights(buf, formatted_lines)
+
+    -- Update window dimensions
+    local dimensions = Window.calculate_window_dimensions(text_lines, content)
+    local win_config = Window.create_window_options(dimensions)
+    _api.nvim_win_set_config(win, win_config)
 end
 
 return Window

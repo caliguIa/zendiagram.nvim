@@ -2,7 +2,6 @@
 local Float = {}
 
 local _window = require("zendiagram.float.window")
-local _lines = require("zendiagram.float.lines")
 local _buffer = require("zendiagram.float.buffer")
 local _format = require("zendiagram.float.format")
 local _api = vim.api
@@ -16,26 +15,6 @@ local function get_current_diagnostics()
     local line = vim.fn.line(".") - 1
     local bufnr = _api.nvim_get_current_buf()
     return vim.diagnostic.get(bufnr, { lnum = line })
-end
-
----Update existing window content and highlighting
----@param win number Window handle
----@param formatted_lines table[] Formatted lines with highlighting info
----@param content string Raw content for dimension calculation
-local function update_window_content(win, formatted_lines, content)
-    local buf = _api.nvim_win_get_buf(win)
-
-    -- Update content and highlights
-    local text_lines = _lines.to_text(formatted_lines)
-    vim.bo[buf].modifiable = true
-    _api.nvim_buf_set_lines(buf, 0, -1, false, text_lines)
-    vim.bo[buf].modifiable = false
-    _lines.apply_highlights(buf, formatted_lines)
-
-    -- Update window dimensions
-    local dimensions = _window.calculate_window_dimensions(text_lines, content)
-    local win_config = _window.create_window_options(dimensions)
-    _api.nvim_win_set_config(win, win_config)
 end
 
 ---@class ZendiagramOpenOptions
@@ -70,7 +49,7 @@ function Float.open(opts)
 
         -- Update existing window content
         local formatted_lines, content = _format.format_diagnostics(diagnostics)
-        update_window_content(_diagnostic_win, formatted_lines, content)
+        _window.update_window_content(_diagnostic_win, formatted_lines, content)
         return
     end
 
