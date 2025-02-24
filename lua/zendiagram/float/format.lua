@@ -54,7 +54,6 @@ function Format.format_diagnostics(diagnostics)
         })
     end
 
-    -- Format each diagnostic
     for i, diagnostic in ipairs(diagnostics) do
         if i > 1 then
             table.insert(lines, {

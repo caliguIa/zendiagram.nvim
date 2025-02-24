@@ -1,8 +1,8 @@
 ---@class ZendiagramFloat
 local Float = {}
 
-local _utils = require("zendiagram.utils")
 local _window = require("zendiagram.float.window")
+local _lines = require("zendiagram.float.lines")
 local _buffer = require("zendiagram.float.buffer")
 local _format = require("zendiagram.float.format")
 local _api = vim.api
@@ -24,24 +24,13 @@ end
 ---@param content string Raw content for dimension calculation
 local function update_window_content(win, formatted_lines, content)
     local buf = _api.nvim_win_get_buf(win)
-    local ns = _api.nvim_create_namespace("zendiagram")
 
-    -- Extract just the text from the formatted lines
-    local text_lines = vim.tbl_map(
-        function(line) return type(line) == "table" and line.text or line end,
-        formatted_lines
-    )
-
-    -- Update buffer content
+    -- Update content and highlights
+    local text_lines = _lines.to_text(formatted_lines)
     vim.bo[buf].modifiable = true
     _api.nvim_buf_set_lines(buf, 0, -1, false, text_lines)
     vim.bo[buf].modifiable = false
-
-    -- Reapply highlighting
-    _api.nvim_buf_clear_namespace(buf, ns, 0, -1)
-    for i, line in ipairs(formatted_lines) do
-        if type(line) == "table" then _utils.apply_highlighting(buf, ns, i - 1, line) end
-    end
+    _lines.apply_highlights(buf, formatted_lines)
 
     -- Update window dimensions
     local dimensions = _window.calculate_window_dimensions(text_lines, content)
