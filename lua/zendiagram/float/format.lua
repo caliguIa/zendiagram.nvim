@@ -1,4 +1,3 @@
--- float/format.lua
 local Format = {}
 
 local _utils = require("zendiagram.utils")
@@ -55,7 +54,6 @@ function Format.format_diagnostics(diagnostics)
         })
     end
 
-    -- Format each diagnostic
     for i, diagnostic in ipairs(diagnostics) do
         if i > 1 then
             table.insert(lines, {
@@ -72,12 +70,13 @@ function Format.format_diagnostics(diagnostics)
                 text = " " .. line,
                 hl = "ZendiagramText",
                 keywords = {
-                    { pattern = "'[^']+'", hl = "ZendiagramKeyword" }, -- 'word'
-                    { pattern = "`[^`]+`", hl = "ZendiagramKeyword" }, -- `word`
-                    { pattern = "%([^%)]+%)", hl = "ZendiagramKeyword" }, -- (word)
-                    { pattern = "{[^}]+}", hl = "ZendiagramKeyword" }, -- {word}
-                    { pattern = "%[[^%]]+%]", hl = "ZendiagramKeyword" }, -- [word]
-                    { pattern = '"[^"]+"', hl = "ZendiagramKeyword" }, -- "word"
+                    { pattern = "'[^']+'", hl = "ZendiagramKeyword" },
+                    { pattern = "`[^`]+`", hl = "ZendiagramKeyword" },
+                    { pattern = '"[^"]+"', hl = "ZendiagramKeyword" },
+                    { pattern = "<[^>]+>", hl = "ZendiagramKeyword" },
+                    { pattern = "%([^%)]+%)", hl = "ZendiagramKeyword" },
+                    { pattern = "{[^}]+}", hl = "ZendiagramKeyword" },
+                    { pattern = "%[[^%]]+%]", hl = "ZendiagramKeyword" },
                 },
             }
             table.insert(lines, formatted_line)
