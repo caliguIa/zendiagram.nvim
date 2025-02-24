@@ -2,11 +2,6 @@
 
 A minimal, good looking diagnostic float window for Neovim.
 
-## Features
-
-- Clean, distraction-free diagnostic floating window
-- Markdown formatting with syntax highlighting for clearer errors
-
 ## Demo
 
 <details>
@@ -61,8 +56,7 @@ return {
 ```lua
 require('zendiagram').setup({
     -- Below are the default values
-    header = "## Diagnostics", -- Header text
-    style = "default", -- Float window style - 'default' | 'compact'
+    header = "Diagnostics", -- Header text
     max_width = 50, -- The maximum width of the float window
     min_width = 25, -- The minimum width of the float window
     max_height = 10, -- The maximum height of the float window
@@ -71,6 +65,13 @@ require('zendiagram').setup({
         row = 1, -- The offset from the top of the screen
         col_offset = 2, -- The offset from the right of the screen
     },
+    highlights = { -- Highlight groups for each section of the float
+        ZendiagramHeader = "Error", -- Accepts a highlight group name or a table of highlight group opts
+        ZendiagramSeparator = "NonText",
+        ZendiagramText = "Normal",
+        ZendiagramKeyword = "Keyword",
+    },
+
 })
 ```
 
@@ -127,8 +128,3 @@ vim.keymap.set({"n", "x"}, "[d", function ()
 end,
 { desc = "Jump to prev diagnostic" })
 ```
-
-Due to the markdown formatting, it is strongly advised to use a markdown rendering plugin such as
-[render-markdown.nvim](https://github.com/MeanderingProgrammer/render-markdown.nvim) to really see the benefits of zendiagram.
-
-I may explore non-markdown formatting in the future, but for now, markdown is it.

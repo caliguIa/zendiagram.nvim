@@ -6,6 +6,7 @@ local _modules = {
     config = nil,
     float = nil,
     utils = nil,
+    highlights = nil,
 }
 
 ---@param opts table|nil Configuration options
@@ -19,8 +20,10 @@ function Zendiagram.setup(opts)
     _modules.config = require("zendiagram.config")
     _modules.float = require("zendiagram.float")
     _modules.utils = require("zendiagram.utils")
+    _modules.highlights = require("zendiagram.highlights")
 
     _modules.config.setup(opts)
+    _modules.highlights.setup()
 
     _initialized = true
     return Zendiagram
