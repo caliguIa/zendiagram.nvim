@@ -2,30 +2,35 @@
 ---@field row number
 ---@field col_offset number
 
+---@class ZendiagramHighlightGroups
+---@field ZendiagramHeader string
+---@field ZendiagramSeparator string
+---@field ZendiagramText string
+---@field ZendiagramKeyword string
+
 ---@class ZendiagramConfig
 ---@field header string|nil
----@field style "default"|"compact"
 ---@field max_width number
 ---@field min_width number
 ---@field max_height number
 ---@field position ZendiagramConfigPosition
+---@field highlights ZendiagramHighlightGroups
 ---@field border "single"|"double"|"rounded"|"shadow"|"none"
 
 ---@class ZendiagramConfigModule
 ---@field header string|nil
----@field style "default"|"compact"
 ---@field max_width number
 ---@field min_width number
 ---@field max_height number
 ---@field position ZendiagramConfigPosition
 ---@field border "single"|"double"|"rounded"|"shadow"|"none"
+---@field highlights ZendiagramHighlightGroups
 ---@field setup fun(opts: ZendiagramConfig|nil): ZendiagramConfig
 local Config = {}
 
 ---@type ZendiagramConfig
 local _config = {
-    header = "## Diagnostics",
-    style = "default",
+    header = "Diagnostics",
     max_width = 50,
     min_width = 25,
     max_height = 10,
@@ -33,6 +38,12 @@ local _config = {
     position = {
         row = 1,
         col_offset = 2,
+    },
+    highlights = {
+        ZendiagramHeader = "Error",
+        ZendiagramSeparator = "NonText",
+        ZendiagramText = "Normal",
+        ZendiagramKeyword = "Keyword",
     },
 }
 
@@ -42,11 +53,6 @@ local function validate_config(opts)
     local ok = pcall(function()
         vim.validate({
             header = { opts.header, { "string", "nil" } },
-            style = {
-                opts.style,
-                function(style) return style == nil or style == "default" or style == "compact" end,
-                'must be "default" or "compact"',
-            },
             max_width = {
                 opts.max_width,
                 function(n) return n == nil or (type(n) == "number" and n > 0) end,
@@ -75,6 +81,7 @@ local function validate_config(opts)
                 end,
                 'must be "single", "double", "rounded", "shadow" or "none"',
             },
+            highlights = { opts.highlights, { "table", "string", "nil" } },
         })
 
         if opts.position then

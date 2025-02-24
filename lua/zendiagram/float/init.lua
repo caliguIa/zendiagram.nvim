@@ -17,6 +17,62 @@ local function get_current_diagnostics()
     return vim.diagnostic.get(bufnr, { lnum = line })
 end
 
+---Update existing window content and highlighting
+---@param win number Window handle
+---@param formatted_lines table[] Formatted lines with highlighting info
+---@param content string Raw content for dimension calculation
+local function update_window_content(win, formatted_lines, content)
+    local buf = _api.nvim_win_get_buf(win)
+    local ns = _api.nvim_create_namespace("zendiagram")
+
+    -- Extract just the text from the formatted lines
+    local text_lines = vim.tbl_map(
+        function(line) return type(line) == "table" and line.text or line end,
+        formatted_lines
+    )
+
+    -- Update buffer content
+    vim.bo[buf].modifiable = true
+    _api.nvim_buf_set_lines(buf, 0, -1, false, text_lines)
+    vim.bo[buf].modifiable = false
+
+    -- Reapply highlighting
+    _api.nvim_buf_clear_namespace(buf, ns, 0, -1)
+    for i, line in ipairs(formatted_lines) do
+        if type(line) == "table" then
+            if line.hl then
+                _api.nvim_buf_set_extmark(buf, ns, i - 1, 0, {
+                    line_hl_group = line.hl,
+                    priority = 100,
+                })
+            end
+            if line.keywords then
+                for _, kw in ipairs(line.keywords) do
+                    local start_idx = line.text:find(kw.pattern)
+                    while start_idx do
+                        local end_idx = line.text:find("[`'\")}>%]]", start_idx + 1)
+                        if end_idx then
+                            _api.nvim_buf_set_extmark(buf, ns, i - 1, start_idx, {
+                                end_col = end_idx - 1,
+                                hl_group = kw.hl,
+                                priority = 200,
+                            })
+                            start_idx = line.text:find(kw.pattern, end_idx + 1)
+                        else
+                            break
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    -- Update window dimensions
+    local dimensions = _window.calculate_window_dimensions(text_lines, content)
+    local win_config = _window.create_window_options(dimensions)
+    _api.nvim_win_set_config(win, win_config)
+end
+
 ---@class ZendiagramOpenOptions
 ---@field focus boolean|nil Whether to focus the window (default: true)
 
@@ -48,16 +104,8 @@ function Float.open(opts)
         end
 
         -- Update existing window content
-        local lines, content = _format.format_diagnostics(diagnostics)
-        local buf = _api.nvim_win_get_buf(_diagnostic_win)
-
-        vim.bo[buf].modifiable = true
-        _api.nvim_buf_set_lines(buf, 0, -1, false, lines)
-        vim.bo[buf].modifiable = false
-
-        local dimensions = _window.calculate_window_dimensions(lines, content)
-        local win_config = _window.create_window_options(dimensions)
-        _api.nvim_win_set_config(_diagnostic_win, win_config)
+        local formatted_lines, content = _format.format_diagnostics(diagnostics)
+        update_window_content(_diagnostic_win, formatted_lines, content)
         return
     end
 
@@ -66,7 +114,7 @@ function Float.open(opts)
 
     local dimensions = _window.calculate_window_dimensions(lines, content)
     local win_opts = _window.create_window_options(dimensions)
-    _diagnostic_win = _api.nvim_open_win(buf, false, win_opts) -- Never focus on initial creation
+    _diagnostic_win = _api.nvim_open_win(buf, false, win_opts)
 
     _window.set_window_options(_diagnostic_win)
     _window.setup_window_autocommands(_diagnostic_win, buf, opts.focus)
