@@ -44,6 +44,7 @@ require('zendiagram').setup({
     min_width = 25, -- The minimum width of the float window
     max_height = 10, -- The maximum height of the float window
     border = "none", -- The border style of the float window
+    source = true, -- Whether to display diagnostic source
     position = {
         row = 1, -- The offset from the top of the screen
         col_offset = 2, -- The offset from the right of the screen
@@ -53,6 +54,7 @@ require('zendiagram').setup({
         ZendiagramSeparator = "NonText",
         ZendiagramText = "Normal",
         ZendiagramKeyword = "Keyword",
+        ZendiagramSource = "Type", -- Highlight for diagnostic source when source=true
     },
 
 })
@@ -111,3 +113,4 @@ vim.keymap.set({"n", "x"}, "[d", function ()
 end,
 { desc = "Jump to prev diagnostic" })
 ```
+

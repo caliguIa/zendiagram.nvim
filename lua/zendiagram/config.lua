@@ -7,6 +7,7 @@
 ---@field ZendiagramSeparator string
 ---@field ZendiagramText string
 ---@field ZendiagramKeyword string
+---@field ZendiagramSource string
 
 ---@class ZendiagramConfig
 ---@field header string|nil
@@ -16,6 +17,7 @@
 ---@field position ZendiagramConfigPosition
 ---@field highlights ZendiagramHighlightGroups
 ---@field border "single"|"double"|"rounded"|"shadow"|"none"
+---@field source boolean Whether to display diagnostic sources
 
 ---@class ZendiagramConfigModule
 ---@field header string|nil
@@ -25,6 +27,7 @@
 ---@field position ZendiagramConfigPosition
 ---@field border "single"|"double"|"rounded"|"shadow"|"none"
 ---@field highlights ZendiagramHighlightGroups
+---@field source boolean Whether to display diagnostic sources
 ---@field setup fun(opts: ZendiagramConfig|nil): ZendiagramConfig
 local Config = {}
 
@@ -32,9 +35,10 @@ local Config = {}
 local _config = {
     header = "Diagnostics",
     max_width = 50,
-    min_width = 25,
-    max_height = 10,
+    min_width = 32,
+    max_height = 12,
     border = "none",
+    source = true,
     position = {
         row = 1,
         col_offset = 2,
@@ -44,6 +48,7 @@ local _config = {
         ZendiagramSeparator = "NonText",
         ZendiagramText = "Normal",
         ZendiagramKeyword = "Keyword",
+        ZendiagramSource = "Type",
     },
 }
 
@@ -82,6 +87,7 @@ local function validate_config(opts)
                 'must be "single", "double", "rounded", "shadow" or "none"',
             },
             highlights = { opts.highlights, { "table", "string", "nil" } },
+            source = { opts.source, { "boolean", "nil" } },
         })
 
         if opts.position then

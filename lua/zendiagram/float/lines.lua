@@ -35,6 +35,14 @@ function Lines.apply_line_highlight(buf, ns, line_nr, line)
         })
     end
 
+    if line.source_highlight then
+        _api.nvim_buf_set_extmark(buf, ns, line_nr, line.source_highlight.start_col, {
+            hl_group = line.source_highlight.hl,
+            end_col = line.source_highlight.end_col,
+            priority = 150,
+        })
+    end
+
     if line.keywords then Lines.apply_keyword_highlights(buf, ns, line_nr, line) end
 end
 

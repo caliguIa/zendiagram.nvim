@@ -62,10 +62,17 @@ function Format.format_diagnostics(diagnostics)
             })
         end
 
-        local message_lines, message_longest = wrap_diagnostic_message(diagnostic.message, width)
+        local message = diagnostic.message
+        local source = diagnostic.source
+        if _config.source and source then
+            if source:sub(-1, -1) == "." then source = source:sub(1, -2) end
+            message = source .. ": " .. message
+        end
+
+        local message_lines, message_longest = wrap_diagnostic_message(message, width)
         longest_message = #message_longest > #longest_message and message_longest or longest_message
 
-        for _, line in ipairs(message_lines) do
+        for i, line in ipairs(message_lines) do
             local formatted_line = {
                 text = " " .. line,
                 hl = "ZendiagramText",
@@ -78,7 +85,18 @@ function Format.format_diagnostics(diagnostics)
                     { pattern = "{[^}]+}", hl = "ZendiagramKeyword" },
                     { pattern = "%[[^%]]+%]", hl = "ZendiagramKeyword" },
                 },
+                source_highlight = nil,
             }
+
+            -- Add source highlighting for the first line only
+            if i == 1 and _config.source and source then
+                formatted_line.source_highlight = {
+                    start_col = 1, -- After the space
+                    end_col = #source + 1, -- Include the colon
+                    hl = "ZendiagramSource",
+                }
+            end
+
             table.insert(lines, formatted_line)
         end
     end
