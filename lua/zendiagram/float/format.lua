@@ -88,10 +88,9 @@ function Format.format_diagnostics(diagnostics)
                 source_highlight = nil,
             }
 
-            -- Add source highlighting for the first line only
             if i == 1 and _config.source and source then
                 formatted_line.source_highlight = {
-                    start_col = 1, -- After the space
+                    start_col = 1,
                     end_col = #source + 1, -- Include the colon
                     hl = "ZendiagramSource",
                 }
