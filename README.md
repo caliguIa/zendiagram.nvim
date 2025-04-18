@@ -2,7 +2,7 @@
 
 A minimal, good looking diagnostic float window for Neovim.
 
-## Demo
+## Screenshots
 
 <img src="https://github.com/caliguIa/zendiagram.nvim/blob/main/assets/demo_multi.png?raw=true" style="width: 45%"/> <img src="https://github.com/caliguIa/zendiagram.nvim/blob/main/assets/demo_single.png?raw=true" style="width: 45%"/>
 <img src="https://github.com/caliguIa/zendiagram.nvim/blob/main/assets/demo_w_sources.png?raw=true" style="width: 90%"/>
@@ -63,10 +63,17 @@ require('zendiagram').setup({
 
 ## Usage
 
-zendiagram exposes two functions to the user:
+zendiagram exposes two lua functions to the user:
 
 - `open`: opens the diagnostics float window, and if the window is already open, focuses it
 - `close`: closes the diagnostics float window (you are likely to not need this)
+
+There is also a user command with the same arguments:
+
+```
+:Zendiagram open
+:Zendiagram close
+```
 
 You can use these functions in your keymaps, or in autocmds to automatically open the diagnostics float when the cursor moves.
 
@@ -74,7 +81,10 @@ You can use these functions in your keymaps, or in autocmds to automatically ope
 vim.keymap.set(
     "n",
     "<Leader>e",
-    function() require('zendiagram').open() end,
+    function()
+        require('zendiagram').open()
+        -- vim.cmd.Zendiagram('open')
+    end,
     { silent = true, desc = "Open diagnostics float" }
 )
 ```

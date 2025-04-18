@@ -25,6 +25,23 @@ function Zendiagram.setup(opts)
     _modules.config.setup(opts)
     _modules.highlights.setup()
 
+    vim.api.nvim_create_user_command("Zendiagram", function(cmd_opts)
+        local args = vim.split(cmd_opts.args, "%s+", { trimempty = true })
+        local subcmd = args[1]
+
+        if subcmd == "open" then
+            Zendiagram.open(args[2] and { focus = args[2] } or {})
+        elseif subcmd == "close" then
+            Zendiagram.close()
+        else
+            vim.notify("Unknown Zendiagram command: " .. (subcmd or ""), vim.log.levels.ERROR)
+        end
+    end, {
+        desc = "Zendiagram commands",
+        nargs = "*",
+        complete = function() return { "open", "close" } end,
+    })
+
     _initialized = true
     return Zendiagram
 end
