@@ -4,7 +4,8 @@ A minimal, good looking diagnostic float window for Neovim.
 
 ## Demo
 
-<img src="https://github.com/caliguIa/zendiagram.nvim/blob/main/assets/demo_multi.png?raw=true" style="width: 30%"/> <img src="https://github.com/caliguIa/zendiagram.nvim/blob/main/assets/demo_single.png?raw=true" style="width: 30%"/> <img src="https://github.com/caliguIa/zendiagram.nvim/blob/main/assets/demo_w_sources.png?raw=true" style="width: 30%"/>
+<img src="https://github.com/caliguIa/zendiagram.nvim/blob/main/assets/demo_multi.png?raw=true" style="width: 45%"/> <img src="https://github.com/caliguIa/zendiagram.nvim/blob/main/assets/demo_single.png?raw=true" style="width: 45%"/>
+<img src="https://github.com/caliguIa/zendiagram.nvim/blob/main/assets/demo_w_sources.png?raw=true" style="width: 90%"/>
 
 ## Installation
 
