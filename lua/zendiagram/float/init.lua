@@ -22,7 +22,7 @@ end
 
 ---@param opts? {focus: boolean}
 function Float.open(opts)
-    opts = opts or { focus = true }
+    opts = vim.tbl_extend("force", { focus = true }, opts)
 
     local diagnostics = get_current_diagnostics()
 
