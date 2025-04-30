@@ -43,7 +43,7 @@ require('zendiagram').setup({
     header = "Diagnostics", -- Float window title
     source = true, -- Whether to display diagnostic source
     relative = "line", -- "line"|"win" - What the float window's position is relative to
-    anchor = "NE", -- When 'relative' is set to "win" this sets the position of the floating window
+    anchor = "NE", -- "NE"|"SE"|"SW"|"NW" - When 'relative' is set to "win" this sets the position of the floating window
 })
 ```
 
