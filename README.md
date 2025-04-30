@@ -4,8 +4,8 @@ A minimal, good looking diagnostic float window for Neovim.
 
 ## Screenshots
 
-<img src="https://github.com/caliguIa/zendiagram.nvim/blob/main/assets/demo_multi.png?raw=true" style="width: 45%"/> <img src="https://github.com/caliguIa/zendiagram.nvim/blob/main/assets/demo_single.png?raw=true" style="width: 45%"/>
-<img src="https://github.com/caliguIa/zendiagram.nvim/blob/main/assets/demo_w_sources.png?raw=true" style="width: 90%"/>
+<img src="https://github.com/caliguIa/zendiagram.nvim/blob/main/assets/demo_multi_line.png?raw=true" style="width: 45%"/> <img src="https://github.com/caliguIa/zendiagram.nvim/blob/main/assets/demo_multi_ne.png?raw=true" style="width: 45%"/>
+<img src="https://github.com/caliguIa/zendiagram.nvim/blob/main/assets/demo_single_line.png?raw=true" style="width: 45%"/> <img src="https://github.com/caliguIa/zendiagram.nvim/blob/main/assets/demo_single_ne.png?raw=true" style="width: 45%"/>
 
 ## Installation
 
@@ -142,3 +142,10 @@ vim.keymap.set({"n", "x"}, "[d", function ()
   end)
 end, { desc = "Jump to prev diagnostic" })
 ```
+
+There are highlight groups exposed if you wish to customise the appearance of the float and it's contents.
+
+- "ZendiagramText",
+- "ZendiagramKeyword"
+- "ZendiagramSeparator"
+- "ZendiagramHeader"
