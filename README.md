@@ -40,42 +40,57 @@ return {
 ```lua
 require('zendiagram').setup({
     -- Below are the default values
-    header = "Diagnostics", -- Header text
-    max_width = 50, -- The maximum width of the float window
-    min_width = 25, -- The minimum width of the float window
-    max_height = 10, -- The maximum height of the float window
-    border = "none", -- The border style of the float window
+    header = "Diagnostics", -- Float window title
     source = true, -- Whether to display diagnostic source
-    position = {
-        row = 1, -- The offset from the top of the screen
-        col_offset = 2, -- The offset from the right of the screen
-    },
-    highlights = { -- Highlight groups for each section of the float
-        ZendiagramHeader = "Error", -- Accepts a highlight group name or a table of highlight group opts
-        ZendiagramSeparator = "NonText",
-        ZendiagramText = "Normal",
-        ZendiagramKeyword = "Keyword",
-        ZendiagramSource = "Type", -- Highlight for diagnostic source when source=true
-    },
-
+    relative = "line", -- "line"|"win" - What the float window's position is relative to
+    anchor = "NE", -- When 'relative' is set to "win" this sets the position of the floating window
 })
 ```
 
 ## Usage
 
-zendiagram exposes two lua functions to the user:
+zendiagram exposes a few ways to configure and use the plugin.
+As the underlying api used is the `vim.diagnostic.open_float` the most convenient solution is to override the default function.
+As the `vim.diagnostic.open_float` api is used, all the expected behaviours around focusing the window remain constant here.
 
-- `open`: opens the diagnostics float window, and if the window is already open, focuses it
-- `close`: closes the diagnostics float window (you are likely to not need this)
+```lua
+require("zendiagram").setup()
+vim.diagnostic.open_float = Zendiagram.open
+-- or: vim.diagnostic.open_float = require("zendiagram").open()
+-- or: vim.diagnostic.open_float = vim.cmd.Zendiagram('open')
+vim.keymap.set(
+    "n",
+    "<Leader>e",
+    vim.diagnostic.open_float,
+    { silent = true, desc = "Open diagnostics float" }
+)
+```
 
-There is also a user command with the same arguments:
+The open command is the entry point, there are a few ways of accessing it:
+
+- A user command:
 
 ```
 :Zendiagram open
-:Zendiagram close
 ```
 
-You can use these functions in your keymaps, or in autocmds to automatically open the diagnostics float when the cursor moves.
+```lua
+vim.cmd.Zendiagram('open')
+```
+
+- A lua function:
+
+```lua
+require("zendiagram").open()
+```
+
+- The Zendiagram global:
+
+```lua
+Zendiagram.open()
+```
+
+If you don't want to override the default `vim.diagnostic.open_float` you can use these functions in your keymaps or autocmds.
 
 ```lua
 vim.keymap.set(
@@ -83,25 +98,24 @@ vim.keymap.set(
     "<Leader>e",
     function()
         require('zendiagram').open()
-        -- vim.cmd.Zendiagram('open')
+        -- or: vim.cmd.Zendiagram('open')
+        -- or: Zendiagram.open()
+        -- or: vim.diagnostic.open_float() if you have overridden the default function
     end,
     { silent = true, desc = "Open diagnostics float" }
 )
 ```
 
-With the above keymap set usage would look like so:
-
-- Press `<Leader>e` (or your configured mapping) to show diagnostics for the current line
-- Press it again to focus the float
-- Use `q` to close the float
-- The float automatically closes when focus is lost, or if the float is not focused; this occurs when the cursor moves
-
 Similarly, you can use an autocmd to automatically open the diagnostics float when the cursor moves.
-Be sure to set `focus = false` to prevent the float from stealing focus on cursor move.
 
 ```lua
 vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
-    callback = function() require("zendiagram").open({ focus = false }) end,
+    callback = function()
+        require("zendiagram").open()
+        -- or: vim.cmd.Zendiagram('open')
+        -- or: Zendiagram.open()
+        -- or: vim.diagnostic.open_float() if you have overridden the default function
+    end,
 })
 ```
 
@@ -109,19 +123,22 @@ Another option would be to override the default `vim.diagnostic.jump` keymaps li
 
 ```lua
 vim.keymap.set({"n", "x"}, "]d", function ()
-  vim.diagnostic.jump({count = 1})
-  vim.schedule(function()
-    require("zendiagram").open()
-  end)
-end,
-{ desc = "Jump to next diagnostic" })
+    vim.diagnostic.jump({ count = 1 })
+    vim.schedule(function()
+        require("zendiagram").open()
+        -- or: vim.cmd.Zendiagram('open')
+        -- or: Zendiagram.open()
+        -- or: vim.diagnostic.open_float() if you have overridden the default function
+    end)
+end, { desc = "Jump to next diagnostic" })
 
 vim.keymap.set({"n", "x"}, "[d", function ()
-  vim.diagnostic.jump({count = -1})
+  vim.diagnostic.jump({ count = -1 })
   vim.schedule(function()
     require("zendiagram").open()
+    -- or: vim.cmd.Zendiagram('open')
+    -- or: Zendiagram.open()
+    -- or: vim.diagnostic.open_float() if you have overridden the default function
   end)
-end,
-{ desc = "Jump to prev diagnostic" })
+end, { desc = "Jump to prev diagnostic" })
 ```
-
