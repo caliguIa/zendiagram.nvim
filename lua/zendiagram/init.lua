@@ -5,63 +5,72 @@ local diag_api = vim.diagnostic
 local initialised = false
 local ns_id = api.nvim_create_namespace("custom_diagnostic_highlight")
 
-local keyword_patterns = {
-    { pattern = "'[^']+'" },
-    { pattern = "`[^`]+`" },
-    { pattern = '"[^"]+"' },
-    { pattern = "<[^>]+>" },
-    { pattern = "%([^%)]+%)" },
-    { pattern = "{[^}]+}" },
-    { pattern = "%[[^%]]+%]" },
+local BASE_PRIORITY = 9998
+local HIGHLIGHT_PRIORITY = 9999
+
+local opening_delimiters = "['\"<({%[`]"
+local delimiters = {
+    ["'"] = "'",
+    ["`"] = "`",
+    ['"'] = '"',
+    ["<"] = ">",
+    ["("] = ")",
+    ["{"] = "}",
+    ["["] = "]",
 }
 
 local apply_highlights = function(bufnr)
     local lines = api.nvim_buf_get_lines(bufnr, 0, -1, false)
 
     for i, line in ipairs(lines) do
-        -- Lua lines are 1-indexed, but nvim API expects 0-indexed rows
+        -- Lua is 1 indexed but nvim API expects 0 indexed
         local row = i - 1
 
-        if not line or #line == 0 then
-            -- Skip empty lines
-        elseif line:match("─") then
-            -- Separator line
+        -- Skip header and empty lines
+        if row == 0 or #line == 0 then goto continue end
+
+        -- Handle separator lines first
+        if line:match("─") then
             api.nvim_buf_set_extmark(bufnr, ns_id, row, 0, {
                 end_row = row,
                 end_col = #line,
                 hl_group = "NonText",
-                priority = 9998,
+                priority = BASE_PRIORITY,
             })
-        elseif row ~= 0 then
-            -- Normal line text
-            api.nvim_buf_set_extmark(bufnr, ns_id, row, 0, {
-                end_row = row,
-                end_col = #line,
-                hl_group = "Normal",
-                priority = 9998,
-            })
-
-            -- Keyword special highlights
-            for _, pattern_obj in ipairs(keyword_patterns) do
-                local pattern = pattern_obj.pattern
-                local start_pos = 1
-
-                while true do
-                    local s, e = line:find(pattern, start_pos)
-                    if not s then break end
-
-                    api.nvim_buf_set_extmark(bufnr, ns_id, row, s - 1, {
-                        end_row = row,
-                        end_col = e,
-                        hl_group = "@variable",
-                        priority = 9999,
-                    })
-
-                    -- Move to position after this match
-                    start_pos = e + 1
-                end
-            end
+            goto continue
         end
+
+        -- Set the base highlight for the whole line
+        api.nvim_buf_set_extmark(bufnr, ns_id, row, 0, {
+            end_row = row,
+            end_col = #line,
+            hl_group = "Normal",
+            priority = BASE_PRIORITY,
+        })
+
+        -- Set highlights for keywords
+        local pos = 1
+        while pos <= #line do
+            local opening_index = line:find(opening_delimiters, pos)
+            if not opening_index then break end
+
+            local opening_char = line:sub(opening_index, opening_index)
+            local closing_char = delimiters[opening_char]
+
+            local closing_index = line:find(closing_char, opening_index + 1, true)
+            if closing_index and closing_index > opening_index + 1 then -- Ensure content exists between delimiters
+                api.nvim_buf_set_extmark(bufnr, ns_id, row, opening_index - 1, {
+                    end_row = row,
+                    end_col = closing_index,
+                    hl_group = "@variable",
+                    priority = HIGHLIGHT_PRIORITY,
+                })
+            end
+
+            pos = (closing_index and closing_index + 1) or (opening_index + 1)
+        end
+
+        ::continue::
     end
 end
 
@@ -98,7 +107,6 @@ local set_diagnostic_float_config = function()
     diag_api.config({
         float = {
             scope = "line",
-            -- border = "single",
             header = " Diagnostics ",
             prefix = "",
             suffix = "",
