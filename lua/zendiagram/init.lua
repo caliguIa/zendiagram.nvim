@@ -1,13 +1,11 @@
 local Zendiagram = {}
 
 local api = vim.api
-local diag_api = vim.diagnostic
-local initialised = false
-local ns_id = api.nvim_create_namespace("custom_diagnostic_highlight")
+local dapi = vim.diagnostic
 
-local BASE_PRIORITY = 9998
-local HIGHLIGHT_PRIORITY = 9999
-
+local highlight_base_priority = 9998
+local highlight_acc_priority = 9999
+local separator_char = "─"
 local opening_delimiters = "['\"<({%[`]"
 local delimiters = {
     ["'"] = "'",
@@ -18,24 +16,26 @@ local delimiters = {
     ["{"] = "}",
     ["["] = "]",
 }
+local float_cache = { winid = nil, bufnr = nil }
+local format_cache = {}
+local separator_cache = {}
+local initialised = false
+local virgin_open_float = dapi.open_float
+local ns_id = api.nvim_create_namespace("custom_diagnostic_highlight")
 
 local apply_highlights = function(bufnr)
     local lines = api.nvim_buf_get_lines(bufnr, 0, -1, false)
-
     for i, line in ipairs(lines) do
-        -- Lua is 1 indexed but nvim API expects 0 indexed
         local row = i - 1
-
-        -- Skip header and empty lines
         if row == 0 or #line == 0 then goto continue end
 
-        -- Handle separator lines first
-        if line:match("─") then
+        -- Set highlight for separator line
+        if line:match(separator_char) then
             api.nvim_buf_set_extmark(bufnr, ns_id, row, 0, {
                 end_row = row,
                 end_col = #line,
                 hl_group = "NonText",
-                priority = BASE_PRIORITY,
+                priority = highlight_base_priority,
             })
             goto continue
         end
@@ -45,7 +45,7 @@ local apply_highlights = function(bufnr)
             end_row = row,
             end_col = #line,
             hl_group = "Normal",
-            priority = BASE_PRIORITY,
+            priority = highlight_base_priority,
         })
 
         -- Set highlights for keywords
@@ -63,7 +63,7 @@ local apply_highlights = function(bufnr)
                     end_row = row,
                     end_col = closing_index,
                     hl_group = "@variable",
-                    priority = HIGHLIGHT_PRIORITY,
+                    priority = highlight_acc_priority,
                 })
             end
 
@@ -74,11 +74,80 @@ local apply_highlights = function(bufnr)
     end
 end
 
-local default_open_float = diag_api.open_float
-Zendiagram.open = function(opts, ...)
-    local float_bufnr = default_open_float(opts, ...)
+local function get_separator(length)
+    if not separator_cache[length] then separator_cache[length] = "\n" .. string.rep(separator_char, length) end
+    return separator_cache[length]
+end
 
-    if not float_bufnr or not api.nvim_buf_is_valid(float_bufnr) then return float_bufnr end
+local format_diagnostic = function(diagnostic)
+    local cache_key = diagnostic.bufnr .. "_" .. diagnostic.lnum .. "_" .. diagnostic.col .. "_" .. diagnostic.severity
+    if format_cache[cache_key] then return format_cache[cache_key] end
+
+    local source = diagnostic.source or ""
+    if source:sub(-1, -1) == "." then source = source:sub(1, -2) end
+    source = source .. ": "
+    local output = " " .. source .. diagnostic.message .. " "
+
+    local all_diagnostics = dapi.get(diagnostic.bufnr, { lnum = diagnostic.lnum })
+    if #all_diagnostics > 1 then
+        table.sort(all_diagnostics, function(a, b) return a.severity < b.severity end)
+
+        -- Calculate longest message once
+        local longest_msg_len = 0
+        for _, diag in ipairs(all_diagnostics) do
+            local msg_len = #(source .. diag.message)
+            if msg_len > longest_msg_len then longest_msg_len = msg_len end
+        end
+
+        -- Check if this is the last diagnostic
+        local is_last = true
+        for _, diag in ipairs(all_diagnostics) do
+            if diag.severity > diagnostic.severity then
+                is_last = false
+                break
+            end
+        end
+
+        if not is_last then
+            local separator = get_separator(longest_msg_len + 2)
+            output = output .. separator
+        end
+    end
+
+    format_cache[cache_key] = output
+    return output
+end
+
+local set_diagnostic_float_config = function()
+    dapi.config({
+        float = {
+            scope = "line",
+            header = " Diagnostics ",
+            prefix = "",
+            suffix = "",
+            severity_sort = true,
+            source = false,
+            format = format_diagnostic,
+        },
+    })
+end
+
+local setup_autocmds = function()
+    local group = api.nvim_create_augroup("Zendiagram", { clear = true })
+
+    api.nvim_create_autocmd({ "BufDelete" }, {
+        group = group,
+        callback = function()
+            float_cache = { float_winid = nil, float_bufnr = nil }
+            format_cache = {}
+            separator_cache = {}
+        end,
+    })
+end
+
+Zendiagram.open = function(opts, ...)
+    local float_bufnr, float_winid = virgin_open_float(opts, ...)
+
     if not initialised then
         vim.notify(
             "Zendiagram not initialised, please call the setup function. Falling back to default diagnostics float",
@@ -87,64 +156,20 @@ Zendiagram.open = function(opts, ...)
         return float_bufnr
     end
 
-    -- Filter the list to only include windows that are displaying the given buffer
-    local buffer_windows = {}
-    for _, win_id in ipairs(api.nvim_list_wins()) do
-        if vim.api.nvim_win_get_buf(win_id) == float_bufnr then table.insert(buffer_windows, win_id) end
+    if float_winid and api.nvim_win_is_valid(float_winid) then
+        float_cache.winid = float_winid
+        float_cache.bufnr = api.nvim_win_get_buf(float_cache.winid)
+        apply_highlights(float_cache.bufnr)
     end
 
-    local float_win = buffer_windows[1]
-    local float_win_config = api.nvim_win_get_config(float_win)
-
-    if not api.nvim_win_is_valid(float_win) or float_win_config.relative == "" then return float_bufnr end
-
-    apply_highlights(float_bufnr)
-
-    return float_bufnr
-end
-
-local set_diagnostic_float_config = function()
-    diag_api.config({
-        float = {
-            scope = "line",
-            header = " Diagnostics ",
-            prefix = "",
-            suffix = "",
-            severity_sort = true,
-            source = false,
-            format = function(diagnostic)
-                local source = diagnostic.source or ""
-                if source:sub(-1, -1) == "." then source = source:sub(1, -2) end
-                source = source .. ": "
-                local output = " " .. source .. diagnostic.message .. " "
-
-                local diagnostics_table = diag_api.get(diagnostic.bufnr, { lnum = diagnostic.lnum })
-                table.sort(diagnostics_table, function(a, b) return a.severity < b.severity end)
-                local diagnostics = vim.iter(diagnostics_table)
-
-                if #diagnostics_table > 1 then
-                    local longest_msg_len = diagnostics:fold(#(source .. diagnostic.message), function(acc, next)
-                        local next_message = source .. next.message
-                        return acc >= #next_message and acc or #next_message
-                    end)
-
-                    local is_last = diagnostic.message == diagnostics:last().message
-                    if not is_last then
-                        local separator = "\n" .. string.rep("─", longest_msg_len + 2)
-                        output = output .. separator
-                    end
-                end
-
-                return output
-            end,
-        },
-    })
+    return float_cache.bufnr, float_cache.winid
 end
 
 Zendiagram.setup = function()
     initialised = true
-    diag_api.open_float = Zendiagram.open
+    dapi.open_float = Zendiagram.open
     set_diagnostic_float_config()
+    setup_autocmds()
 end
 
 return Zendiagram
