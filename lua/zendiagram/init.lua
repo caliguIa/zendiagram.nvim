@@ -144,8 +144,6 @@ end
 H.set_diagnostic_float_config = function()
     vim.diagnostic.config({
         float = {
-            -- scope = "line",
-            -- border = "single",
             header = " " .. H.config.header .. " ",
             prefix = "",
             suffix = "",
